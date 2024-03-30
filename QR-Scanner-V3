@@ -1,0 +1,56 @@
+import pyautogui
+import threading
+import os
+from pyzbar.pyzbar import decode
+from selenium import webdriver
+from PIL import Image
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+import time
+num = 0
+Done = False
+
+def screenshotit():
+    global num, Done
+    threading.Timer(10.0, screenshotit).start()
+    if Done == False:
+        myScreenshot = pyautogui.screenshot()
+        path = r'C:\Users\Home\Desktop\AutoLogin\Newfolder\Random'
+        if os.path.exists(path + r'.png'):
+            os.remove(path + r'.png')
+        myScreenshot.save(path + r'.png')
+        value = (decode(Image.open(path + r'.png')))
+        if value: 
+            value = value[0].data.decode('utf-8')
+            Done = True
+        else:
+            value = None 
+        if value:
+            #conf = yaml.safe_load(open('Secret.yml')) #usign safe_load due to load will require loader
+            username = "studentid"
+            password = "password"
+            options = webdriver.ChromeOptions()
+            options.page_load_strategy = 'normal' #Need to wait till website loads finish
+            driver = webdriver.Chrome(options=options)
+            driver.implicitly_wait(5)
+
+            def login(url,username, password):
+                driver.get(url)
+                actions = ActionChains(driver)
+                actions.send_keys(username)
+                actions.send_keys(Keys.TAB)
+                actions.send_keys(password)
+                actions.send_keys(Keys.TAB)
+                actions.send_keys(Keys.ENTER)
+                actions.perform()
+                time.sleep(5)
+                driver.quit()
+
+
+            login(value, username, password)
+            os._exit(1)
+        num += 1
+        time.sleep(5)
+
+screenshotit()
