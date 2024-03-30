@@ -1,0 +1,56 @@
+import pyautogui
+import threading
+import os
+import cv2
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+import yamla
+import time
+import sys
+num = 0
+
+
+def screenshotit():
+    global num
+    timer = threading.Timer(5.0, screenshotit).start()
+    myScreenshot = pyautogui.screenshot()
+    path = r'C:\Users\Home\Desktop\AutoLogin\Newfolder\Random'
+    if os.path.exists(path + f"_{num-1}" + r'.png'):
+        os.remove(path + f"_{num-1}" + r'.png')
+    myScreenshot.save(path + f"_{num}" + r'.png')
+    img = cv2.imread(path + f"_{num}" + r'.png')
+    detect = cv2.QRCodeDetector()
+    value = detect.detectAndDecode(img)[0]
+    print(str(value))
+    if value:
+        #conf = yaml.safe_load(open('Secret.yml')) #usign safe_load due to load will require loader
+        username = "121123327"
+        password = "notPass321!!?"
+        options = webdriver.ChromeOptions()
+        options.page_load_strategy = 'normal' #Need to wait till website loads finish
+        driver = webdriver.Chrome(options=options)
+        driver.implicitly_wait(5)
+
+        def login(url,username, password):
+            driver.get(url)
+            actions = ActionChains(driver)
+            actions.send_keys(username)
+            actions.send_keys(Keys.TAB)
+            actions.send_keys(password)
+            actions.send_keys(Keys.TAB)
+            actions.send_keys(Keys.ENTER)
+            actions.perform()
+            time.sleep(5)
+            driver.quit()
+
+
+        login(value, username, password)
+        os._exit(1)
+    num += 1
+    time.sleep(5)
+
+screenshotit()
